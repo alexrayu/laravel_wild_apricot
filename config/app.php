@@ -67,7 +67,25 @@ return [
     */
 
     'providers' => [
-        App\Providers\AppServiceProvider::class,
+        App\Providers\WaApiProvider::class,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | WA Setup
+    |--------------------------------------------------------------------------
+    |
+    | Setup for the WA API. Confidential.
+    |
+    */
+
+    'wa_api' => [
+        'key' => env('WA_API_KEY'),
+        'uid' => env('WA_API_UID'),
+        'secret' => env('WA_API_SECRET'),
+        'url' => env('WA_API_URL'),
+        'auth_url' => env('WA_API_AUTH_URL'),
+        'version' => env('WA_API_VERSION'),
+        'timeout' => env('WA_API_TIMEOUT'),
+    ],
 ];
