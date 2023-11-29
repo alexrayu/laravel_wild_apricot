@@ -25,15 +25,55 @@ class WaApiProvider extends ServiceProvider
         });
     }
 
-    public function test(): string
+    /**
+     * Get the data from the API.
+     *
+     * @param  string  $uri
+     *   The URI to get.
+     *
+     * @return array
+     *   The data.
+     */
+    public function get($uri): array
     {
         $token = $this->getToken();
+        if (empty($token)) {
+            $token = $this->getToken(true);
+        }
+        if (empty($token)) {
+            throw new \Exception('Could not get token.');
+        }
+        $url = config('app.wa_api.url') . $uri;
+        $response = Http::withToken($token)->get($url);
+        if ($response->failed()) {
+            $token = $this->getToken(true);
+            if (empty($token)) {
+                throw new \Exception('Could not get token.');
+            }
+            $response = Http::withToken($token)->get($url);
+            if ($response->failed()) {
+                throw new \Exception($response->reason());
+            }
+        }
 
-        return 'Test';
+        return $response->json();
     }
 
-    protected function getToken(): string
+    /**
+     * Get the token from the API.
+     *
+     * @param  bool  $renew
+     *   Whether to renew the token.
+     * @return string
+     *   The token.
+     */
+    protected function getToken($renew = false): string
     {
+        $token = file_get_contents(storage_path('token.key'));
+        if ($token && ! $renew) {
+            return $token;
+        }
+
         // Get the API key and secret from the app config.
         $apiKey = config('app.wa_api.key');
         $authUrl = config('app.wa_api.auth_url');
@@ -46,20 +86,12 @@ class WaApiProvider extends ServiceProvider
             ]);
 
         // Return the token.
-        $json = $response->json();
-
-        return $response->json()['access_token'];
-    }
-
-    public function initTokenByContactCredentials($userName, $password, $scope = null)
-    {
-        if ($scope) {
-            $this->tokenScope = $scope;
+        $token = $response->json()['access_token'];
+        if ($token) {
+            file_put_contents(storage_path('token.key'), $token);
+            return $token;
         }
 
-        $this->token = $this->getAuthTokenByAdminCredentials($userName, $password);
-        if (! $this->token) {
-            throw new Exception('Unable to get authorization token.');
-        }
+        throw new \Exception('Could not get token.');
     }
 }

@@ -29,6 +29,22 @@ class TestConnection extends Command
      */
     public function handle(WaApiProvider $waApiProvider): void
     {
-        $this->info($waApiProvider->test());
+        $start = microtime(true);
+        $this->info('Test: Requesting Accounts from Wild Apricot API.');
+        $data = $waApiProvider->get('accounts');
+        $diff = round(microtime(true) - $start, 2) . 's';
+        if (empty($data)) {
+            throw new \Exception('Could not get accounts.');
+        }
+
+        $accounts = [];
+        foreach ($data as $account) {
+            $accounts[$account['Id']] = [
+                'id' => $account['Id'],
+                'name' => $account['Name'],
+            ];
+        }
+        $this->table(['ID', 'Name'], $accounts);
+        $this->info("Execution time: $diff.");
     }
 }
