@@ -26,15 +26,42 @@ class WaApiProvider extends ServiceProvider
     }
 
     /**
+     * Get the accounts from the API.
+     *
+     * @return array
+     *   The accounts.
+     */
+    public function getAccounts(): array
+    {
+        return $this->get('accounts');
+    }
+
+    /**
+     * Get the contacts from the API.
+     *
+     * @return array
+     *   The contacts.
+     */
+    public function getContacts(): array
+    {
+        $account_id = config('app.wa_api.account_id');
+        return $this->get("accounts/$account_id/contacts", [
+            '$async' => 'false',
+        ]);
+    }
+
+    /**
      * Get the data from the API.
      *
      * @param  string  $uri
      *   The URI to get.
+     * @param  array  $params
+     *   The parameters to pass.
      *
      * @return array
      *   The data.
      */
-    public function get($uri): array
+    public function get($uri, $params = []): array
     {
         $token = $this->getToken();
         if (empty($token)) {
@@ -44,13 +71,13 @@ class WaApiProvider extends ServiceProvider
             throw new \Exception('Could not get token.');
         }
         $url = config('app.wa_api.url') . $uri;
-        $response = Http::withToken($token)->get($url);
+        $response = Http::withToken($token)->get($url, $params);
         if ($response->failed()) {
             $token = $this->getToken(true);
             if (empty($token)) {
                 throw new \Exception('Could not get token.');
             }
-            $response = Http::withToken($token)->get($url);
+            $response = Http::withToken($token)->get($url, $params);
             if ($response->failed()) {
                 throw new \Exception($response->reason());
             }

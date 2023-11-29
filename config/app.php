@@ -83,5 +83,6 @@ return [
         'key' => env('WA_API_KEY'),
         'auth_url' => env('WA_API_AUTH_URL'),
         'url' => env('WA_API_URL'),
+        'account_id' => env('WA_API_ACCOUNT_ID'),
     ],
 ];
