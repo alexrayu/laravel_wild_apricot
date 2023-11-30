@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Providers\CsvProvider;
 use App\Providers\WaApiProvider;
 use LaravelZero\Framework\Commands\Command;
 
@@ -27,12 +28,12 @@ class ImportContacts extends Command
     /**
      * Execute the console command.
      */
-    public function handle(WaApiProvider $waApiProvider): void
+    public function handle(WaApiProvider $waApiProvider, CsvProvider $csvProvider): void
     {
         $start = microtime(true);
         $this->info('Requesting existing contacts.');
         $data = $waApiProvider->getContacts();
-        $diff = round(microtime(true) - $start, 2) . 's';
+        $diff = round(microtime(true) - $start, 2).'s';
         if (empty($data['Contacts'])) {
             throw new \Exception('Could not get contacts.');
         }
@@ -41,6 +42,6 @@ class ImportContacts extends Command
         foreach ($data['Contacts'] as $contact) {
             $contacts[$contact['Id']] = $contact;
         }
-        $this->info('Received ' . count($contacts) . ' contacts.');
+        $this->info('Received '.count($contacts).' contacts.');
     }
 }
