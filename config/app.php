@@ -68,6 +68,7 @@ return [
 
     'providers' => [
         App\Providers\WaApiProvider::class,
+        App\Providers\CsvProvider::class,
     ],
 
     /*

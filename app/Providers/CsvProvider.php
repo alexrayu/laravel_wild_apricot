@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * CSV service provider.
+ */
 class CsvProvider extends ServiceProvider
 {
     /**
@@ -36,7 +39,7 @@ class CsvProvider extends ServiceProvider
      * @return array
      *   Imported CSV.
      */
-    public function getCSV($file_name, $key_id, $header_rows = 1)
+    public function getCSV($file_name, $key_id = 'id', $header_rows = 1)
     {
         $data = [];
         $header = [];
@@ -60,30 +63,6 @@ class CsvProvider extends ServiceProvider
                     $joined = array_combine($header, $fragment);
                     $data[$joined[$key_id]] = $joined;
                 }
-            }
-            fclose($handle);
-        }
-
-        return ['header' => $header, 'data' => $data];
-    }
-
-    /**
-     * Get content of csv file by a different id.
-     *
-     * @param $other_id
-     * @return array
-     */
-    public function getCSVOtherID($file_name, $key_id, $header_rows = 1)
-    {
-        $data = [];
-        $header = [];
-        if ($handle = fopen($file_name, 'r')) {
-            for ($i = 0; $i < $header_rows; $i++) {
-                $header = fgetcsv($handle);
-            }
-            while (($fragment = fgetcsv($handle)) !== false) {
-                $joined = array_combine($header, $fragment);
-                $data[$joined[$key_id]][$joined[$key_id]] = $joined;
             }
             fclose($handle);
         }

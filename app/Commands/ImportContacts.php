@@ -30,18 +30,33 @@ class ImportContacts extends Command
      */
     public function handle(WaApiProvider $waApiProvider, CsvProvider $csvProvider): void
     {
-        $start = microtime(true);
-        $this->info('Requesting existing contacts.');
+        $existing_contacts = $this->getRemoteContacts($waApiProvider);
+        $csv_contacts = $csvProvider->getCSV(storage_path().'/contacts.csv');
+        $a = 1;
+
+    }
+
+    /**
+     * Gets the existing WA contacts.
+     *
+     * @param  WaApiProvider  $waApiProvider
+     *   Wild Apricot API provider.
+     * @return array
+     *  Existing contacts.
+     */
+    protected function getRemoteContacts($waApiProvider): array
+    {
+        $this->info('Requesting existing contacts. Can take some time.');
         $data = $waApiProvider->getContacts();
-        $diff = round(microtime(true) - $start, 2).'s';
         if (empty($data['Contacts'])) {
             throw new \Exception('Could not get contacts.');
         }
-        $this->info("Query time: $diff.");
         $contacts = [];
         foreach ($data['Contacts'] as $contact) {
             $contacts[$contact['Id']] = $contact;
         }
         $this->info('Received '.count($contacts).' contacts.');
+
+        return $contacts;
     }
 }

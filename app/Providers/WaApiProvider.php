@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Wild Apricot API service provider.
+ */
 class WaApiProvider extends ServiceProvider
 {
     /**
@@ -45,6 +48,7 @@ class WaApiProvider extends ServiceProvider
     public function getContacts(): array
     {
         $account_id = config('app.wa_api.account_id');
+
         return $this->get("accounts/$account_id/contacts", [
             '$async' => 'false',
         ]);
@@ -57,7 +61,6 @@ class WaApiProvider extends ServiceProvider
      *   The URI to get.
      * @param  array  $params
      *   The parameters to pass.
-     *
      * @return array
      *   The data.
      */
@@ -70,7 +73,7 @@ class WaApiProvider extends ServiceProvider
         if (empty($token)) {
             throw new \Exception('Could not get token.');
         }
-        $url = config('app.wa_api.url') . $uri;
+        $url = config('app.wa_api.url').$uri;
         $response = Http::withToken($token)->get($url, $params);
         if ($response->failed()) {
             $token = $this->getToken(true);
@@ -116,6 +119,7 @@ class WaApiProvider extends ServiceProvider
         $token = $response->json()['access_token'];
         if ($token) {
             file_put_contents(storage_path('token.key'), $token);
+
             return $token;
         }
 
