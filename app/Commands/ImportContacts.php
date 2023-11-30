@@ -83,7 +83,9 @@ class ImportContacts extends Command
 
             // Process custom fields.
             $new_custom_fields = [];
+            $field_names = [];
             foreach ($contact['FieldValues'] as $field_value) {
+                $field_names[] = $field_value['FieldName'];
                 $name = strtolower(str_replace(' ', '_', $field_value['FieldName']));
                 $new_custom_fields[$name] = $field_value;
             }
