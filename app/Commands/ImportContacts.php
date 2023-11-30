@@ -31,9 +31,34 @@ class ImportContacts extends Command
     public function handle(WaApiProvider $waApiProvider, CsvProvider $csvProvider): void
     {
         $existing_contacts = $this->getRemoteContacts($waApiProvider);
-        $csv_contacts = $csvProvider->getCSV(storage_path().'/contacts.csv');
-        $a = 1;
+        $csv_contacts = $csvProvider->getCSV(storage_path().'/contacts.csv')['data'];
+        $matched_contacts = $this->matchContacts($existing_contacts, $csv_contacts);
+    }
 
+    /**
+     * Matches the contacts.
+     *
+     * @param  array  $existing_contacts
+     *   Existing contacts.
+     * @param  array  $csv_contacts
+     *   CSV contacts.
+     * @return array
+     *   Matched contacts.
+     */
+    protected function matchContacts(array $existing_contacts, array $csv_contacts): array
+    {
+        $matched_contacts = [];
+        foreach ($csv_contacts as $csv_id => $csv_contact) {
+            $email = $csv_contact['email'];
+            foreach ($existing_contacts as $existing_contact) {
+                if ($existing_contact['Email'] === $email) {
+                    $matched_contacts[$existing_contact['Id']] = $csv_id;
+                    continue 2;
+                }
+            }
+        }
+
+        return $matched_contacts;
     }
 
     /**
