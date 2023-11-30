@@ -49,14 +49,16 @@ class ImportContacts extends Command
     {
         $matched_contacts = [];
         foreach ($csv_contacts as $csv_id => $csv_contact) {
-            $email = $csv_contact['email'];
+            $csv_email = strtolower($csv_contact['email']);
             foreach ($existing_contacts as $existing_contact) {
-                if ($existing_contact['Email'] === $email) {
+                $api_email = strtolower($existing_contact['FieldValues']['email_address']['Value']);
+                if ($api_email === $csv_email) {
                     $matched_contacts[$existing_contact['Id']] = $csv_id;
                     continue 2;
                 }
             }
         }
+        $this->info('Matched '.count($matched_contacts).' contacts.');
 
         return $matched_contacts;
     }
@@ -78,6 +80,14 @@ class ImportContacts extends Command
         }
         $contacts = [];
         foreach ($data['Contacts'] as $contact) {
+
+            // Process custom fields.
+            $new_custom_fields = [];
+            foreach ($contact['FieldValues'] as $field_value) {
+                $name = strtolower(str_replace(' ', '_', $field_value['FieldName']));
+                $new_custom_fields[$name] = $field_value;
+            }
+            $contact['FieldValues'] = $new_custom_fields;
             $contacts[$contact['Id']] = $contact;
         }
         $this->info('Received '.count($contacts).' contacts.');
