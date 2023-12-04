@@ -54,6 +54,7 @@ class ImportContacts extends Command
                 $api_email = strtolower($existing_contact['FieldValues']['email_address']['Value']);
                 if ($api_email === $csv_email) {
                     $matched_contacts[$existing_contact['Id']] = $csv_id;
+
                     continue 2;
                 }
             }
@@ -74,23 +75,9 @@ class ImportContacts extends Command
     protected function getRemoteContacts($waApiProvider): array
     {
         $this->info('Requesting existing contacts. Can take some time.');
-        $data = $waApiProvider->getContacts();
+        $contacts = $waApiProvider->getContacts();
         if (empty($data['Contacts'])) {
             throw new \Exception('Could not get contacts.');
-        }
-        $contacts = [];
-        foreach ($data['Contacts'] as $contact) {
-
-            // Process custom fields.
-            $new_custom_fields = [];
-            $field_names = [];
-            foreach ($contact['FieldValues'] as $field_value) {
-                $field_names[] = $field_value['FieldName'];
-                $name = strtolower(str_replace(' ', '_', $field_value['FieldName']));
-                $new_custom_fields[$name] = $field_value;
-            }
-            $contact['FieldValues'] = $new_custom_fields;
-            $contacts[$contact['Id']] = $contact;
         }
         $this->info('Received '.count($contacts).' contacts.');
 
