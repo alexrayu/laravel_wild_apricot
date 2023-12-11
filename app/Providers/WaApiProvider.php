@@ -176,8 +176,8 @@ class WaApiProvider extends ServiceProvider
         $contacts = $this->getContacts();
         foreach ($contacts as $contact) {
             if (! empty($contact['Email']) && strtolower($contact['Email']) === $email
-                || (! empty($contact['FieldValues']['email']['Value'])
-                    && strtolower($contact['FieldValues']['email']['Value']) === $email)) {
+                || (! empty($contact['FieldValues']['email_address']['Value'])
+                    && strtolower($contact['FieldValues']['email_address']['Value']) === $email)) {
                 return $contact;
             }
         }

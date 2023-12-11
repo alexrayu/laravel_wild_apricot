@@ -79,7 +79,13 @@ class TestConnection extends Command
         $data = $waApiProvider->createContact([
             'FirstName' => '_API_TEST_FIRST_NAME',
             'LastName' => '_API_TEST_LAST_NAME',
-            'Email' => self::TEST_EMAIL,
+            'FieldValues' => [
+                [
+                    'FieldName' => 'Email address',
+                    'SystemCode' => 'custom-15580055',
+                    'Value' => self::TEST_EMAIL,
+                ],
+            ],
         ]);
         if (empty($data)) {
             throw new \Exception('Could not create contact.');
