@@ -54,6 +54,7 @@ class ImportMemberships extends CommandBase
     protected function matchRecords(array $contacts, array $memberships): array
     {
         $matched_contacts = [];
+        $matches_count = 0;
         foreach ($contacts as $csv_id => $csv_contact) {
 
             $contact_full_name = trim(strtolower($csv_contact['FirstName'].' '.$csv_contact['LastName']));
@@ -63,6 +64,7 @@ class ImportMemberships extends CommandBase
             foreach ($memberships as $membership) {
                 if ($contact_full_name === trim(strtolower($membership['full_name']))) {
                     $matched_contacts[$csv_id][] = $membership;
+                    $matches_count++;
 
                     continue 2;
                 }
