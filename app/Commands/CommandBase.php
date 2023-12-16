@@ -10,6 +10,14 @@ use LaravelZero\Framework\Commands\Command;
  */
 class CommandBase extends Command
 {
+
+    /**
+     * The signature of the command.
+     *
+     * @var string
+     */
+    protected $signature = 'app:base';
+
     /**
      * Whether to allow loading cached values instead of requesting them.
      *
