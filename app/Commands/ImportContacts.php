@@ -4,12 +4,11 @@ namespace App\Commands;
 
 use App\Providers\CsvProvider;
 use App\Providers\WaApiProvider;
-use LaravelZero\Framework\Commands\Command;
 
 /**
  * Imports the contacts.
  */
-class ImportContacts extends Command
+class ImportContacts extends CommandBase
 {
     /**
      * The signature of the command.
@@ -62,25 +61,5 @@ class ImportContacts extends Command
         $this->info('Matched '.count($matched_contacts).' contacts.');
 
         return $matched_contacts;
-    }
-
-    /**
-     * Gets the existing WA contacts.
-     *
-     * @param  WaApiProvider  $waApiProvider
-     *   Wild Apricot API provider.
-     * @return array
-     *  Existing contacts.
-     */
-    protected function getRemoteContacts($waApiProvider): array
-    {
-        $this->info('Requesting existing contacts. Can take some time.');
-        $contacts = $waApiProvider->getContacts();
-        if (empty($data['Contacts'])) {
-            throw new \Exception('Could not get contacts.');
-        }
-        $this->info('Received '.count($contacts).' contacts.');
-
-        return $contacts;
     }
 }
