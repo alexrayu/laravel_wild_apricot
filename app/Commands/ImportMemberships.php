@@ -38,7 +38,12 @@ class ImportMemberships extends CommandBase
     {
         $contacts = $this->getRemoteContacts($waApiProvider);
         $memberships = $csvProvider->getCSV(\storage_path().'/memberships.csv')['data'];
-        $matched_memberships = $this->matchRecords($contacts, $memberships);
+        $matched_records = $this->matchRecords($contacts, $memberships);
+        foreach ($matched_records as $contact_id => $memberships) {
+            foreach ($memberships as $membership) {
+                $a = 1;
+            }
+        }
     }
 
     /**
@@ -53,7 +58,7 @@ class ImportMemberships extends CommandBase
      */
     protected function matchRecords(array $contacts, array $memberships): array
     {
-        $matched_contacts = [];
+        $matched_records = [];
         $matches_count = 0;
         foreach ($contacts as $csv_id => $csv_contact) {
 
@@ -63,16 +68,13 @@ class ImportMemberships extends CommandBase
             }
             foreach ($memberships as $membership) {
                 if ($contact_full_name === trim(strtolower($membership['full_name']))) {
-                    $matched_contacts[$csv_id][] = $membership;
+                    $matched_records[$csv_id][] = $membership;
                     $matches_count++;
-
-                    continue 2;
                 }
             }
         }
-        $this->info('Matched '.count($matched_contacts).' contacts.');
+        $this->info('Matched '.count($matched_records).' contacts.');
 
-        return $matched_contacts;
+        return $matched_records;
     }
-
 }

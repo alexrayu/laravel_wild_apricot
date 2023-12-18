@@ -29,7 +29,7 @@ class WaApiProvider extends ServiceProvider
     }
 
     /**
-     * Get the accounts from the API.
+     * GET ACCOUNTS from the API.
      *
      * @return array
      *   The accounts.
@@ -40,15 +40,14 @@ class WaApiProvider extends ServiceProvider
     }
 
     /**
-     * Get the contacts from the API.
+     * GET CONTACTS from the API.
      *
      * @return array
      *   The contacts.
      */
     public function getContacts(): array
     {
-        $account_id = config('app.wa_api.account_id');
-        $data = $this->get("accounts/$account_id/contacts", [
+        $data = $this->get("accounts/{accountId}/contacts", [
             '$async' => 'false',
         ]);
 
@@ -71,77 +70,29 @@ class WaApiProvider extends ServiceProvider
     }
 
     /**
-     * Get the data from the API.
+     * GET MEMBERSHIP TYPES from the API.
      *
-     * @param  string  $uri
-     *   The URI to get.
-     * @param  array  $params
-     *   The parameters to pass.
      * @return array
-     *   The data.
+     *   The accounts.
      */
-    public function get($uri, $params = []): array
+    public function getMembershipTypes(): array
     {
-        $token = $this->getToken();
-        if (empty($token)) {
-            $token = $this->getToken(true);
-        }
-        if (empty($token)) {
-            throw new \Exception('Could not get token.');
-        }
-        $url = config('app.wa_api.url').$uri;
-        $response = Http::withToken($token)->get($url, $params);
-        if ($response->failed()) {
-            $token = $this->getToken(true);
-            if (empty($token)) {
-                throw new \Exception('Could not get token.');
-            }
-            $response = Http::withToken($token)->get($url, $params);
-            if ($response->failed()) {
-                throw new \Exception($response->reason());
-            }
-        }
-
-        return $response->json();
+        return $this->get('/accounts/{accountId}/membershiplevels');
     }
 
     /**
-     * Post data to the API.
+     * GET MEMBERSHIP TYPES from the API.
      *
-     * @param  string  $uri
-     *   The URI to post to.
-     * @param  array  $params
-     *   The parameters to pass.
      * @return array
-     *   The response data.
+     *   The accounts.
      */
-    public function post($uri, $params = []): array
+    public function getMembershipBundles(): array
     {
-        $token = $this->getToken();
-        if (empty($token)) {
-            $token = $this->getToken(true);
-        }
-        if (empty($token)) {
-            throw new \Exception('Could not get token.');
-        }
-        $url = config('app.wa_api.url').$uri;
-        $response = Http::withToken($token)->post($url, $params);
-        if ($response->failed()) {
-            $token = $this->getToken(true);
-            if (empty($token)) {
-                throw new \Exception('Could not get token.');
-            }
-            $response = Http::withToken($token)->post($url, $params);
-            if ($response->failed()) {
-                throw new \Exception($response->reason());
-            }
-        }
-
-        return $response->json();
+        return $this->get('/accounts/{accountId}/bundles');
     }
 
     /**
-     * Creates a contact at WA API.
+     * POST CONTACT to WA API.
      *
      * @param  array  $contact
      *   The contact to create.
@@ -150,13 +101,33 @@ class WaApiProvider extends ServiceProvider
      */
     public function createContact(array $contact): array
     {
-        $account_id = config('app.wa_api.account_id');
-        $response = $this->post("accounts/$account_id/contacts", [
+        $response = $this->post('accounts/{accountId}/contacts', [
             'contact' => json_encode($contact, JSON_FORCE_OBJECT),
         ]);
 
         if (empty($response['Id'])) {
             throw new \Exception('Could not create contact.');
+        }
+
+        return $response;
+    }
+
+    /**
+     * PUT CONTACT to WA API.
+     *
+     * @param  array  $contact
+     *   The contact to update.
+     * @return array
+     *   The response data containing the updates contact.
+     */
+    public function updateContact(array $contact): array
+    {
+        $response = $this->put('accounts/{accountId}/contacts', [
+            'contact' => json_encode($contact, JSON_FORCE_OBJECT),
+        ]);
+
+        if (empty($response['Id'])) {
+            throw new \Exception('Could not update contact.');
         }
 
         return $response;
@@ -183,6 +154,86 @@ class WaApiProvider extends ServiceProvider
         }
 
         return [];
+    }
+
+    /**
+     * Get the data from the API.
+     *
+     * @param  string  $uri
+     *   The URI to get. {accountId} will be replaced with the account id.
+     * @param  array  $params
+     *   The parameters to pass.
+     * @return array
+     *   The data.
+     */
+    public function get($uri, $params = []): array
+    {
+        // Check token.
+        $token = $this->getToken();
+        if (empty($token)) {
+            $token = $this->getToken(true);
+        }
+        if (empty($token)) {
+            throw new \Exception('Could not get token.');
+        }
+
+        // Get url and replace account id if any.
+        $account_id = config('app.wa_api.account_id');
+        $uri = str_replace('{accountId}', $account_id, $uri);
+        $url = config('app.wa_api.url').$uri;
+        $response = Http::withToken($token)->get($url, $params);
+        if ($response->failed()) {
+            $token = $this->getToken(true);
+            if (empty($token)) {
+                throw new \Exception('Could not get token.');
+            }
+            $response = Http::withToken($token)->get($url, $params);
+            if ($response->failed()) {
+                throw new \Exception($response->reason());
+            }
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Post data to the API.
+     *
+     * @param  string  $uri
+     *   The URI to post to. {accountId} will be replaced with the account id.
+     * @param  array  $params
+     *   The parameters to pass.
+     * @return array
+     *   The response data.
+     */
+    public function post($uri, $params = []): array
+    {
+        // Check token.
+        $token = $this->getToken();
+        if (empty($token)) {
+            $token = $this->getToken(true);
+        }
+        if (empty($token)) {
+            throw new \Exception('Could not get token.');
+        }
+
+        // Get url and replace account id if any.
+        $account_id = config('app.wa_api.account_id');
+        $uri = str_replace('{accountId}', $account_id, $uri);
+        $url = config('app.wa_api.url').$uri;
+        $response = Http::withToken($token)->post($url, $params);
+        if ($response->failed()) {
+            $token = $this->getToken(true);
+            if (empty($token)) {
+                throw new \Exception('Could not get token.');
+            }
+            $response = Http::withToken($token)->post($url, $params);
+            if ($response->failed()) {
+                throw new \Exception($response->reason());
+            }
+        }
+
+        return $response->json();
     }
 
     /**
