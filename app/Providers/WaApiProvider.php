@@ -47,7 +47,7 @@ class WaApiProvider extends ServiceProvider
      */
     public function getContacts(): array
     {
-        $data = $this->get("accounts/{accountId}/contacts", [
+        $data = $this->get('accounts/{accountId}/contacts', [
             '$async' => 'false',
         ]);
 
@@ -70,25 +70,27 @@ class WaApiProvider extends ServiceProvider
     }
 
     /**
-     * GET MEMBERSHIP TYPES from the API.
+     * GET MEMBERSHIP LEVELS from the API.
      *
      * @return array
-     *   The accounts.
+     *   The membership levels.
      */
-    public function getMembershipTypes(): array
+    public function getMembershipLevels(): array
     {
-        return $this->get('/accounts/{accountId}/membershiplevels');
+        return $this->get('accounts/{accountId}/membershiplevels');
     }
 
     /**
-     * GET MEMBERSHIP TYPES from the API.
+     * GET MEMBERSHIP BUNDLES from the API.
      *
      * @return array
-     *   The accounts.
+     *   The membership bundles.
      */
     public function getMembershipBundles(): array
     {
-        return $this->get('/accounts/{accountId}/bundles');
+        return $this->get('accounts/{accountId}/bundles', [
+            'levelId' => '*',
+        ]);
     }
 
     /**

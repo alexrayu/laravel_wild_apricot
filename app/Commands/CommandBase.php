@@ -10,7 +10,6 @@ use LaravelZero\Framework\Commands\Command;
  */
 class CommandBase extends Command
 {
-
     /**
      * The signature of the command.
      *
@@ -53,5 +52,65 @@ class CommandBase extends Command
         file_put_contents($cached_file_name, json_encode($contacts));
 
         return $contacts;
+    }
+
+    /**
+     * Gets the existing WA membership bundles.
+     *
+     * @param  WaApiProvider  $waApiProvider
+     *   Wild Apricot API provider.
+     * @return array
+     *  Existing membership bundles.
+     */
+    protected function getMembershipBundles($waApiProvider): array
+    {
+        $cached_file_name = \storage_path().'/membership_bundles_cache.json';
+        if (self::ALLOW_CACHED && file_exists($cached_file_name)) {
+            $items = json_decode(file_get_contents($cached_file_name), true);
+            if (! empty($items)) {
+                $this->info('Loaded cached membership bundles.');
+
+                return $items;
+            }
+        }
+        $this->info('Requesting existing membership bundles. Can take some time.');
+        $items = $waApiProvider->getMembershipBundles();
+        if (empty($items)) {
+            throw new \Exception('Could not get membership bundles.');
+        }
+        $this->info('Received '.count($items).' membership bundles.');
+        file_put_contents($cached_file_name, json_encode($items));
+
+        return $items;
+    }
+
+    /**
+     * Gets the existing WA membership levels.
+     *
+     * @param  WaApiProvider  $waApiProvider
+     *   Wild Apricot API provider.
+     * @return array
+     *  Existing membership levels.
+     */
+    protected function getMembershipLevels($waApiProvider): array
+    {
+        $cached_file_name = \storage_path().'/membership_levels_cache.json';
+        if (self::ALLOW_CACHED && file_exists($cached_file_name)) {
+            $items = json_decode(file_get_contents($cached_file_name), true);
+            if (! empty($items)) {
+                $this->info('Loaded cached membership levels.');
+
+                return $items;
+            }
+        }
+        $this->info('Requesting existing membership levels. Can take some time.');
+        $items = $waApiProvider->getMembershipLevels();
+        if (empty($items)) {
+            throw new \Exception('Could not get membership levels.');
+        }
+        $this->info('Received '.count($items).' membership levels.');
+        file_put_contents($cached_file_name, json_encode($items));
+
+        return $items;
     }
 }

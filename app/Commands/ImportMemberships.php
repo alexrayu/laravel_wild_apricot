@@ -38,6 +38,8 @@ class ImportMemberships extends CommandBase
     {
         $contacts = $this->getRemoteContacts($waApiProvider);
         $memberships = $csvProvider->getCSV(\storage_path().'/memberships.csv')['data'];
+        $membeship_bundles = $this->getMembershipBundles($waApiProvider);
+        $membership_levels = $this->getMembershipLevels($waApiProvider);
         $matched_records = $this->matchRecords($contacts, $memberships);
         foreach ($matched_records as $contact_id => $memberships) {
             foreach ($memberships as $membership) {
