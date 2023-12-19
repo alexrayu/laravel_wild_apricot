@@ -59,10 +59,12 @@ class CommandBase extends Command
      *
      * @param  WaApiProvider  $waApiProvider
      *   Wild Apricot API provider.
+     * @param  string  $levelId
+     *   Id of the level to get the bundles for.
      * @return array
      *  Existing membership bundles.
      */
-    protected function getMembershipBundles($waApiProvider): array
+    protected function getMembershipBundles($waApiProvider, $levelId): array
     {
         $cached_file_name = \storage_path().'/membership_bundles_cache.json';
         if (self::ALLOW_CACHED && file_exists($cached_file_name)) {
@@ -79,7 +81,7 @@ class CommandBase extends Command
             throw new \Exception('Could not get membership bundles.');
         }
         $this->info('Received '.count($items).' membership bundles.');
-        file_put_contents($cached_file_name, json_encode($items));
+        file_put_contents($cached_file_name, json_encode($items, JSON_PRETTY_PRINT));
 
         return $items;
     }
@@ -109,7 +111,7 @@ class CommandBase extends Command
             throw new \Exception('Could not get membership levels.');
         }
         $this->info('Received '.count($items).' membership levels.');
-        file_put_contents($cached_file_name, json_encode($items));
+        file_put_contents($cached_file_name, json_encode($items, JSON_PRETTY_PRINT));
 
         return $items;
     }
