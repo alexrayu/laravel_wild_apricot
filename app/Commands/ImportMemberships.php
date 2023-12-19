@@ -40,11 +40,24 @@ class ImportMemberships extends CommandBase
         $memberships = $csvProvider->getCSV(\storage_path().'/memberships.csv')['data'];
         $membership_levels = $this->getMembershipLevels($waApiProvider);
         $matched_records = $this->matchRecords($contacts, $memberships, $membership_levels);
-        foreach ($matched_records as $contact_id => $memberships) {
-            foreach ($memberships as $membership) {
-                $a = 1;
-            }
+        foreach ($matched_records as $contact_id => $membership) {
+            $contact = $contacts[$contact_id];
+            $this->addContactToMembership($waApiProvider, $contact, $membership);
         }
+    }
+
+    /**
+     * Updates a contact with a membership.
+     *
+     * @param  WaApiProvider  $waApiProvider
+     *   Wild Apricot API provider.
+     * @param  array  $contact
+     *   Contact.
+     * @param  array  $membership
+     *   Membership.
+     */
+    protected function addContactToMembership($waApiProvider, $contact, $membership) {
+
     }
 
     /**
@@ -83,7 +96,7 @@ class ImportMemberships extends CommandBase
         foreach ($matched_records as $contact_id => $memberships) {
             foreach ($membership_levels as $membership_level) {
                 if ($memberships['membership'] === $membership_level['Name']) {
-                    $matched_records[$contact_id]['membership_level'] = $membership_level;
+                    $matched_records[$contact_id]['_membership_level'] = $membership_level;
                     $matched_levels++;
                     continue 2;
                 }
