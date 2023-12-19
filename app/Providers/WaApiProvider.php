@@ -239,6 +239,47 @@ class WaApiProvider extends ServiceProvider
     }
 
     /**
+     * Put data to the API.
+     *
+     * @param  string  $uri
+     *   The URI to post to. {accountId} will be replaced with the account id.
+     * @param  array  $data
+     *   The data to pass.
+     * @return array
+     *   The response data.
+     */
+    public function put($uri, $data): array
+    {
+        // Check token.
+        $token = $this->getToken();
+        if (empty($token)) {
+            $token = $this->getToken(true);
+        }
+        if (empty($token)) {
+            throw new \Exception('Could not get token.');
+        }
+
+        // Get url and replace account id if any.
+        $body_json = json_encode($data, JSON_FORCE_OBJECT);
+        $account_id = config('app.wa_api.account_id');
+        $uri = str_replace('{accountId}', $account_id, $uri);
+        $url = config('app.wa_api.url').$uri;
+        $response = Http::withToken($token)->put($url, $data);
+        if ($response->failed()) {
+            $token = $this->getToken(true);
+            if (empty($token)) {
+                throw new \Exception('Could not get token.');
+            }
+            $response = Http::withToken($token)->withBody($body_json)->put($url);
+            if ($response->failed()) {
+                throw new \Exception($response->reason());
+            }
+        }
+
+        return $response->json();
+    }
+
+    /**
      * Get the token from the API.
      *
      * @param  bool  $renew

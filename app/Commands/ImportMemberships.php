@@ -40,10 +40,17 @@ class ImportMemberships extends CommandBase
         $memberships = $csvProvider->getCSV(\storage_path().'/memberships.csv')['data'];
         $membership_levels = $this->getMembershipLevels($waApiProvider);
         $matched_records = $this->matchRecords($contacts, $memberships, $membership_levels);
+        $this->info('Updating memberships. Can take some time.');
+        $progress_bar = $this->output->createProgressBar(count($matched_records));
+        $progress_bar->start();
         foreach ($matched_records as $contact_id => $membership) {
             $contact = $contacts[$contact_id];
             $this->addContactToMembership($waApiProvider, $contact, $membership);
+            $progress_bar->advance();
         }
+        $progress_bar->finish();
+        $updated_cids = array_keys($matched_records);
+        $this->info('Updated '.count($updated_cids).' contacts: '.implode(', ', $updated_cids));
     }
 
     /**
@@ -56,8 +63,17 @@ class ImportMemberships extends CommandBase
      * @param  array  $membership
      *   Membership.
      */
-    protected function addContactToMembership($waApiProvider, $contact, $membership) {
-
+    protected function addContactToMembership($waApiProvider, $contact, $membership)
+    {
+        $contact_id = $contact['Id'];
+        $waApiProvider->put('accounts/{accountId}/contacts/'.$contact_id, [
+            'Status' => 'Active',
+            'MembershipLevel' => [
+                'Id' => $membership['_membership_level']['Id'],
+            ],
+            'MembershipEnabled' => 'true',
+            'Id' => $contact_id,
+        ]);
     }
 
     /**
@@ -98,6 +114,7 @@ class ImportMemberships extends CommandBase
                 if ($memberships['membership'] === $membership_level['Name']) {
                     $matched_records[$contact_id]['_membership_level'] = $membership_level;
                     $matched_levels++;
+
                     continue 2;
                 }
             }
